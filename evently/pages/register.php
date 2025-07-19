@@ -1,13 +1,17 @@
 <?php
 require_once '../config/database.php';
-session_start();
+require_once '../includes/session.php';
+
 if (isset($_SESSION['user'])) {
     header("Location: dashboard.php");
     exit;
 }
 
+$errors = $_SESSION['form_errors'] ?? [];
+$old    = $_SESSION['old_inputs'] ?? [];
 $success = $_GET['success'] ?? '';
-$error = $_GET['error'] ?? '';
+$error   = $_GET['error'] ?? '';
+unset($_SESSION['form_errors'], $_SESSION['old_inputs']);
 ?>
 
 <!DOCTYPE html>
@@ -39,19 +43,32 @@ $error = $_GET['error'] ?? '';
     <?php if ($success): ?>
         <div class="alert alert-success"><?= htmlspecialchars($success) ?></div>
     <?php endif; ?>
+
     <?php if ($error): ?>
         <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
+    <?php endif; ?>
+
+    <?php if (!empty($errors)): ?>
+        <div class="alert alert-danger">
+            <ul class="mb-0">
+                <?php foreach ($errors as $e): ?>
+                    <li><?= htmlspecialchars($e) ?></li>
+                <?php endforeach; ?>
+            </ul>
+        </div>
     <?php endif; ?>
 
     <form method="POST" action="../actions/register_action.php">
         <div class="mb-3">
             <label>Full Name</label>
-            <input type="text" name="name" class="form-control" required placeholder="e.g., John Doe">
+            <input type="text" name="name" class="form-control" required placeholder="e.g., John Doe"
+                   value="<?= htmlspecialchars($old['name'] ?? '') ?>">
         </div>
 
         <div class="mb-3">
             <label>Email Address</label>
-            <input type="email" name="email" class="form-control" required placeholder="e.g., john@email.com">
+            <input type="email" name="email" class="form-control" required placeholder="e.g., john@email.com"
+                   value="<?= htmlspecialchars($old['email'] ?? '') ?>">
         </div>
 
         <div class="mb-3">
@@ -65,8 +82,8 @@ $error = $_GET['error'] ?? '';
         <div class="mb-3">
             <label>Role</label>
             <select name="role" class="form-select" required>
-                <option value="user" selected>User</option>
-                <option value="admin">Admin</option>
+                <option value="user" <?= (isset($old['role']) && $old['role'] === 'user') ? 'selected' : '' ?>>User</option>
+                <option value="admin" <?= (isset($old['role']) && $old['role'] === 'admin') ? 'selected' : '' ?>>Admin</option>
             </select>
         </div>
 
@@ -74,6 +91,7 @@ $error = $_GET['error'] ?? '';
             <button type="submit" class="btn btn-success">Register</button>
         </div>
 
+        <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
         <p class="text-center">Already have an account? <a href="login.php">Login here</a></p>
     </form>
 </div>

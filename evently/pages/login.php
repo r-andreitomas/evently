@@ -1,6 +1,7 @@
 <?php
 require_once '../config/database.php';
-session_start();
+require_once '../includes/session.php';
+
 if (isset($_SESSION['user'])) {
     header("Location: dashboard.php");
     exit;
@@ -53,6 +54,8 @@ if (isset($_SESSION['user'])) {
                 <button class="btn btn-outline-secondary" type="button" id="togglePassword">Show</button>
             </div>
         </div>
+
+        <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
 
         <div class="d-grid mb-2">
             <button type="submit" class="btn btn-primary">Login</button>

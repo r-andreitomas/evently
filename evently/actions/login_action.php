@@ -1,5 +1,6 @@
 <?php
 require_once '../config/database.php';
+require_once '../includes/session.php';
 session_start();
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -10,6 +11,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt = $pdo->prepare("SELECT * FROM users WHERE email = ?");
     $stmt->execute([$email]);
     $user = $stmt->fetch();
+
+    //CSRF Login Protection
+    if (!isset($_POST['csrf_token'], $_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
+        die("Invalid CSRF token.");
+    }
 
     // Check if user exists and password matches
     if ($user && password_verify($password, $user['password'])) {
@@ -28,4 +34,3 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit;
     }
 }
-?>
