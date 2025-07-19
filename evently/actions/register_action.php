@@ -26,7 +26,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 
     if (!preg_match($regexPasswordPattern, $rawPassword)) {
-        $errors[] = "Invalid password. Password must be at least 8 characters long and contain both letters and numbers.";
+        $errors[] = "Invalid password. Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character.";
     }
 
     if (!empty($errors)) {
@@ -42,7 +42,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt = $pdo->prepare("INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)");
         $stmt->execute([$name, $email, $password, $role]);
 
-        header("Location: ../pages/register.php?success=Account created! You may now log in.");
+        header("Location: ../pages/login.php?success=Account created! You may now log in.");
         exit;
     } catch (PDOException $e) {
         if ($e->getCode() == 23000) { // Duplicate email
