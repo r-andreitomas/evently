@@ -1,7 +1,6 @@
 <?php
 require_once '../config/database.php';
 require_once '../includes/session.php';
-session_start();
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = $_POST['email'];
@@ -22,7 +21,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // Set session and redirect to dashboard
         $_SESSION['user'] = [
             'id' => $user['id'],
-            'name' => $user['name'],
+            'username' => $user['username'], // <--- ADD THIS LINE HERE
+            'name' => $user['name'], // Keep this as is; it might be 'full_name'
             'email' => $user['email'],
             'role' => $user['role']
         ];

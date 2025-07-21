@@ -11,7 +11,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $user_id  = $_SESSION['user']['id'];
     $event_id = $_POST['event_id'];
 
-    // Check if already RSVPed
+    // Check if already Reserved
     $check = $pdo->prepare("SELECT * FROM rsvps WHERE user_id = ? AND event_id = ?");
     $check->execute([$user_id, $event_id]);
     if ($check->rowCount() > 0) {

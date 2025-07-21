@@ -10,11 +10,11 @@ if (!isset($_SESSION['user'])) {
 $user = $_SESSION['user'];
 $user_id = $user['id'];
 
-// Fetch events with RSVP status
+// Fetch events with Reserve status
 $stmt = $pdo->prepare("
     SELECT events.*, users.name AS creator_name,
-           (SELECT COUNT(*) FROM rsvps WHERE rsvps.event_id = events.id) AS total_rsvps,
-           (SELECT COUNT(*) FROM rsvps WHERE rsvps.event_id = events.id AND rsvps.user_id = ?) AS has_rsvped
+           (SELECT COUNT(*) FROM rsvps WHERE rsvps.event_id = events.id) AS total_Reserve,
+           (SELECT COUNT(*) FROM rsvps WHERE rsvps.event_id = events.id AND rsvps.user_id = ?) AS has_Reserve
     FROM events
     JOIN users ON events.user_id = users.id
     ORDER BY event_date ASC
@@ -50,21 +50,7 @@ $events = $stmt->fetchAll();
 </head>
 <body>
 
-<!-- 🔝 Navbar -->
-<nav class="navbar navbar-expand-lg bg-primary navbar-dark py-3 mb-4">
-    <div class="container d-flex justify-content-between align-items-center">
-        <a class="navbar-brand evently-logo" href="../index.php">Evently</a>
-        <div class="d-flex align-items-center">
-            <ul class="navbar-nav me-3">
-                <li class="nav-item"><a class="nav-link active" href="#events">Events</a></li>
-                <li class="nav-item"><a class="nav-link" href="create_event.php">Create</a></li>
-                <li class="nav-item"><a class="nav-link" href="my_tickets.php">My Tickets</a></li>
-            </ul>
-            <span class="text-white me-3"><?= htmlspecialchars($user['name']) ?> (<?= $user['role'] ?>)</span>
-            <a href="../logout.php" class="btn btn-outline-light btn-sm">Logout</a>
-        </div>
-    </div>
-</nav>
+<?php include '../includes/header.php'; ?>
 
 <!-- 📋 Events -->
 <div class="container py-5" id="events">
@@ -84,28 +70,28 @@ $events = $stmt->fetchAll();
                 <p class="mb-1">Location: <?= htmlspecialchars($event['location']) ?></p>
                 <p class="mb-1">Price: ₱<?= number_format($event['price'], 2) ?></p>
 
-                <!-- RSVP Progress -->
+                <!-- Reserve Progress -->
                 <?php if ($event['max_attendees']): ?>
                     <div class="mb-2">
                         <div class="progress" style="height: 20px;">
-                            <div class="progress-bar bg-info" role="progressbar" style="width: <?= ($event['total_rsvps'] / $event['max_attendees']) * 100 ?>%;">
-                                <?= $event['total_rsvps'] ?> / <?= $event['max_attendees'] ?>
+                            <div class="progress-bar bg-info" role="progressbar" style="width: <?= ($event['total_Reserve'] / $event['max_attendees']) * 100 ?>%;">
+                                <?= $event['total_Reserve'] ?> / <?= $event['max_attendees'] ?>
                             </div>
                         </div>
                     </div>
                 <?php else: ?>
-                    <p class="mb-2">RSVPs: <?= $event['total_rsvps'] ?></p>
+                    <p class="mb-2">Reserve: <?= $event['total_Reserve'] ?></p>
                 <?php endif; ?>
 
-                <!-- RSVP Status -->
-                <?php if ($event['has_rsvped']): ?>
-                    <span class="badge bg-success mb-2">RSVPed ✅</span>
-                <?php elseif ($event['max_attendees'] && $event['total_rsvps'] >= $event['max_attendees']): ?>
-                    <span class="badge bg-secondary mb-2">RSVP Full ❌</span>
+                <!-- Reserve Status -->
+                <?php if ($event['has_Reserve']): ?>
+                    <span class="badge bg-success mb-2">Reserve ✅</span>
+                <?php elseif ($event['max_attendees'] && $event['total_Reserve'] >= $event['max_attendees']): ?>
+                    <span class="badge bg-secondary mb-2">Reserve Full ❌</span>
                 <?php else: ?>
-                    <form method="POST" action="../actions/rsvp_action.php" class="d-inline">
+                    <form method="POST" action="../actions/reserve_action.php" class="d-inline">
                         <input type="hidden" name="event_id" value="<?= $event['id'] ?>">
-                        <button type="submit" class="btn btn-primary btn-sm">RSVP</button>
+                        <button type="submit" class="btn btn-primary btn-sm">Reserve</button>
                     </form>
                 <?php endif; ?>
 
@@ -115,38 +101,38 @@ $events = $stmt->fetchAll();
                     <a href="../actions/delete_event_action.php?id=<?= $event['id'] ?>" class="btn btn-danger btn-sm ms-1" onclick="return confirm('Are you sure you want to delete this event?')">Delete</a>
                 <?php endif; ?>
 
-                <!-- ADMIN RSVP LIST -->
+                <!-- ADMIN Reserve LIST -->
                 <?php if ($user['role'] === 'admin'): ?>
                     <details class="mt-3">
-                        <summary><strong>See RSVPs</strong></summary>
+                        <summary><strong>See Reserve</strong></summary>
                         <?php
-                            $rsvp_stmt = $pdo->prepare("
-                                SELECT r.id AS rsvp_id, u.name, u.email, r.rsvp_date
-                                FROM rsvps r
+                            $Reserve_stmt = $pdo->prepare("
+                                SELECT r.id AS Reserve_id, u.name, u.email, r.Reserve_date
+                                FROM Reserve r
                                 JOIN users u ON r.user_id = u.id
                                 WHERE r.event_id = ?
                             ");
-                            $rsvp_stmt->execute([$event['id']]);
-                            $rsvps = $rsvp_stmt->fetchAll();
+                            $Reserve_stmt->execute([$event['id']]);
+                            $Reserve = $Reserve_stmt->fetchAll();
                         ?>
 
-                        <?php if ($rsvps): ?>
+                        <?php if ($Reserve): ?>
                             <ul class="mt-2 list-group">
-                                <?php foreach ($rsvps as $rsvp): ?>
+                                <?php foreach ($Reserve as $Reserve): ?>
                                     <li class="list-group-item d-flex justify-content-between align-items-center">
                                         <div>
-                                            <?= htmlspecialchars($rsvp['name']) ?> (<?= htmlspecialchars($rsvp['email']) ?>)
-                                            <small class="text-muted">— <?= date("F j, Y, g:i a", strtotime($rsvp['rsvp_date'])) ?></small>
+                                            <?= htmlspecialchars($Reserve['name']) ?> (<?= htmlspecialchars($Reserve['email']) ?>)
+                                            <small class="text-muted">— <?= date("F j, Y, g:i a", strtotime($Reserve['Reserve_date'])) ?></small>
                                         </div>
-                                        <form method="POST" action="../actions/delete_rsvp_action.php" onsubmit="return confirm('Remove RSVP?')">
-                                            <input type="hidden" name="rsvp_id" value="<?= $rsvp['rsvp_id'] ?>">
+                                        <form method="POST" action="../actions/delete_reserve_action.php" onsubmit="return confirm('Remove Reservation?')">
+                                            <input type="hidden" name="Reserve_id" value="<?= $Reserve['Reserve_id'] ?>">
                                             <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
                                         </form>
                                     </li>
                                 <?php endforeach; ?>
                             </ul>
                         <?php else: ?>
-                            <p class="mt-2 text-muted">No RSVPs yet.</p>
+                            <p class="mt-2 text-muted">No Reservation Yet.</p>
                         <?php endif; ?>
                     </details>
                 <?php endif; ?>

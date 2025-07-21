@@ -69,21 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body>
 
-<!-- 🔝 Navbar -->
-<nav class="navbar navbar-expand-lg bg-primary navbar-dark py-3 mb-4">
-    <div class="container d-flex justify-content-between align-items-center">
-        <a class="navbar-brand evently-logo" href="../index.php">Evently</a>
-        <div class="d-flex align-items-center">
-            <ul class="navbar-nav me-3">
-                <li class="nav-item"><a class="nav-link" href="dashboard.php#events">Events</a></li>
-                <li class="nav-item"><a class="nav-link active" href="create_event.php">Create</a></li>
-                <li class="nav-item"><a class="nav-link" href="my_tickets.php">My Tickets</a></li>
-            </ul>
-            <span class="text-white me-3"><?= htmlspecialchars($user['name']) ?> (<?= $user['role'] ?>)</span>
-            <a href="../logout.php" class="btn btn-outline-light btn-sm">Logout</a>
-        </div>
-    </div>
-</nav>
+<?php include '../includes/header.php'; ?>
 
 <!-- 📝 Form -->
 <div class="container py-5">
